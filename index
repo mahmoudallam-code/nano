@@ -1,229 +1,216 @@
-You are an expert educational content developer and front-end developer specializing in interactive digital learning for K-12.
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رحلة استكشاف سكان شبه الجزيرة العربية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@300;500;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0054a6;
+            --uae-gold: #c5a059;
+            --sky-bg: #e3f2fd;
+            --success-green: #2e7d32;
+        }
 
-FIXED CONTEXT (do not change):
-- Subject: Social Studies
-- Teacher: Mr. Mahmoud Allam
-- School: RAK Academy
-- Target audience: Arab & Emirati students, ages 12–20
-- Language: Modern Standard Arabic (Fusha) as primary, with scientific/key terms in English (bilingual)
-- Address students directly in second person ("أنت المسافر...")
-- Theme: An aerial exploratory journey led by the cartoon character "Captain Noura"
-- Student role: "The Traveler" — content is divided into geographic/historical destinations (stations)
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--sky-bg);
+            margin: 0;
+            overflow-x: hidden;
+            color: #333;
+        }
 
-DYNAMIC INPUTS (extracted from the uploaded file):
-- [LESSON_TITLE]: Extract the lesson title from the uploaded file
-- [GRADE_LEVEL]: Use the grade level specified by the user
-- [STATION_1 through STATION_6]: Extract 6 key topics/themes from the lesson content
-- [LEARNING_OBJECTIVES]: Extract or infer 3–5 learning objectives from the lesson
-- [KEY_VOCABULARY]: Extract all key terms and concepts from the lesson
-- [MAPS_OR_IMAGES]: Identify any geographic locations, historical events, or concepts that need visual maps or images
+        /* Captain Noura Header */
+        .header-box {
+            background: linear-gradient(135deg, var(--primary-blue), #003366);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
 
-════════════════════════════════════════════════════════════
+        .captain-noura {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 50%;
+            border: 3px solid var(--uae-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
 
-TASK: Generate a complete single-file HTML5/CSS3/JavaScript interactive lesson using the content from the uploaded file. Follow every requirement below precisely.
+        /* Passport Progress */
+        .passport-tray {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px;
+            background: #fff;
+        }
 
-═══ STRUCTURAL ARCHITECTURE ═══
+        .stamp {
+            width: 50px;
+            height: 50px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.3;
+            transition: 0.5s;
+        }
 
-Build exactly 6 interactive stations, each covering a key topic extracted from the uploaded file:
+        .stamp.active { opacity: 1; border-color: var(--success-green); color: var(--success-green); }
 
-Station 1: [STATION_1 from file]
-Station 2: [STATION_2 from file]
-Station 3: [STATION_3 from file]
-Station 4: [STATION_4 from file]
-Station 5: [STATION_5 from file]
-Station 6: [STATION_6 from file]
+        /* Main Station Card */
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
 
-Each station must include:
-✦ A SMART learning objective written as "I can..." (أنا أستطيع أن...)
-✦ One interactive activity (drag & drop / matching / sorting / fill-in)
-✦ A Bloom's Taxonomy challenge (one question per level, color-coded):
-   🔵 Remember: "What is / Where / When..."
-   🟢 Understand: "Explain in your own words / Compare between..."
-   🟡 Apply: "Use the map / Apply the concept to..."
-   🟠 Analyze: "Why does X affect Y / Analyze the relationship between..."
-   🔴 Evaluate: "Assess the importance of / Do you believe that..."
-   🟣 Create: "Design / Propose / Invent a solution for..."
-✦ A blank writable text box for open responses with AI-powered answer verification via web search
-✦ A digital passport stamp (automatically applied on completion)
-✦ An interactive map or relevant image tied to the lesson content
+        .station-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
 
-════════════════════════════════════════════════════════════
+        .differentiation-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-═══ GAMIFICATION & UX SYSTEM ═══
+        .diff-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--primary-blue);
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-Digital Passport:
-- Auto-stamp each station upon completion
-- Display passport with all stamps in the final summary
+        .diff-btn.active { background: var(--primary-blue); color: white; }
 
-Star System:
-- 1–3 stars per challenge based on Bloom's level answered correctly
-- Total stars tracked and displayed live
+        .btn-main {
+            background: var(--uae-gold);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-Progress & Unlocking:
-- Stations unlock progressively (station N+1 unlocks only after N is completed)
-- Animated progress bar at the top showing % completion
-- Points counter updating in real time
+        .btn-main:hover { transform: scale(1.05); }
 
-Feedback Engine (WWW/EBI — Automatic):
-- On each text response or activity, generate automatic feedback:
-  ✅ WWW (What Went Well): One specific strength based on the student's answer
-  📈 EBI (Even Better If): One precise improvement step for the next lesson
-  💡 Challenge Question: One deeper thinking question to extend learning
-- Trigger success/retry audio sounds on correct/incorrect answers
+        .hidden { display: none; }
+        
+        /* Interactive Input */
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            font-family: 'Cairo', sans-serif;
+        }
 
-Achievement Board:
-- Updates at the end of each station
-- Displays earned badges per station
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f0fdf4;
+            border-left: 5px solid var(--success-green);
+        }
+    </style>
+</head>
+<body>
 
-UI Design Standards:
-- Card-based UI with smooth CSS animations
-- Design feel: Nearpod / Kahoot inspired
-- Drag & Drop interactions must be fully functional
-- Bilingual labels on all interactive elements (Arabic primary, English secondary)
-- Captain Noura animated mascot appears at key moments with motivational messages
+<div class="header-box">
+    <div>
+        <h1>الوجهة 1: نمو وتوزيع السكان</h1>
+        <p>مرحباً بك في رحلة "صقور الإمارات" الاستكشافية</p>
+    </div>
+    <div class="captain-noura">👩‍✈️</div>
+</div>
 
-════════════════════════════════════════════════════════════
+<div class="passport-tray" id="passport">
+    <div class="stamp" title="تذكر">1</div>
+    <div class="stamp" title="فهم">2</div>
+    <div class="stamp" title="تطبيق">3</div>
+    <div class="stamp" title="تحليل">4</div>
+    <div class="stamp" title="تقويم">5</div>
+    <div class="stamp" title="ابتكار">6</div>
+</div>
 
-═══ DIFFERENTIATION (3 LEVELS PER ACTIVITY) ═══
+<div class="container">
+    <div class="station-card" id="main-task">
+        <div class="differentiation-toggle">
+            <div class="diff-btn active" onclick="setDiff('core')">المستوى الأساسي</div>
+            <div class="diff-btn" onclick="setDiff('scaffold')">دعم (تبسيط)</div>
+            <div class="diff-btn" onclick="setDiff('stretch')">تحدي (إضافي)</div>
+        </div>
 
-Inside every activity, provide three clearly labeled tiers:
+        <h2 id="task-title">محطة "التحليل": لماذا يهاجر السكان؟</h2>
+        <p id="task-desc">بناءً على ما تعلمته، حلل العلاقة بين انهيار سد مأرب وتوزيع السكان في شبه الجزيرة العربية قديماً.</p>
 
-🟥 Scaffolded (دعم مكثف):
-- Word bank provided
-- Sentence starters / frames
-- Simplified vocabulary with original term in brackets
+        <div id="scaffold-hint" class="hidden" style="color: #666; font-style: italic;">
+            مساعدة: استخدم كلمات مثل (الجفاف، البيئة الطاردة، البحث عن الماء).
+        </div>
 
-🟨 Core (المستوى المتوقع):
-- Apply main concepts without support
-- Standard Bloom's question set
+        <textarea id="student-input" placeholder="اكتب إجابتك هنا..."></textarea>
 
-🟩 Stretch (تحدي):
-- Critical analysis tasks
-- Unfamiliar contexts and cross-curricular connections
-- Higher-order Bloom's questions only
+        <button class="btn-main" onclick="validateTask()">ختم الجواز والانتقال</button>
 
-─── STUDENT ENTRY PROFILE ───
-At the start, detect or ask for student level:
-- If low → auto-show Scaffolded version
-- If mid → show Core version
-- If advanced → show Stretch version
-Track all choices in the Teacher Dashboard
+        <div id="feedback-area" class="hidden">
+            <strong>ملاحظات القائدة نورة (WWW/EBI):</strong>
+            <p id="feedback-text"></p>
+        </div>
+    </div>
+</div>
 
-═══ UDL ACCESSIBILITY FEATURES ═══
+<script>
+    let currentLevel = 'core';
+    let completedStations = 0;
 
-Include these controls in a persistent floating toolbar:
-🔡 Font Size Control (Small / Medium / Large)
-🌗 High Contrast Mode toggle
-🔊 Text-to-Speech for every paragraph (Arabic voice)
-📖 Dyslexia-friendly font toggle (OpenDyslexic or similar)
-🌐 EAL Support: simplified sentence structures throughout
+    function setDiff(level) {
+        currentLevel = level;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        const hint = document.getElementById('scaffold-hint');
+        if(level === 'scaffold') hint.classList.remove('hidden');
+        else hint.classList.add('hidden');
+    }
 
-Visuals for every concept:
-- Infographic or icon for each key term from [KEY_VOCABULARY]
-- Bullet-point format for all long text sections
-- Short sentences (max 15 words per sentence in simplified mode)
+    function validateTask() {
+        const input = document.getElementById('student-input').value;
+        if(input.length < 10) {
+            alert("أيها المسافر، الإجابة قصيرة جداً! فكر بعمق أكبر.");
+            return;
+        }
 
-════════════════════════════════════════════════════════════
+        // Simulating feedback logic
+        completedStations++;
+        document.querySelector(`.stamp:nth-child(${completedStations})`).classList.add('active');
+        
+        const feedback = document.getElementById('feedback-area');
+        const feedbackText = document.getElementById('feedback-text');
+        
+        feedback.classList.remove('hidden');
+        feedbackText.innerHTML = `<strong>أحسنت (WWW):</strong> لقد ربطت بين العوامل الطبيعية والهجرة[cite: 174, 205].<br>
+                                  <strong>للتطوير (EBI):</strong> حاول ذكر "الزيادة غير الطبيعية" في إجابتك القادمة[cite: 173].`;
+        
+        if(completedStations === 6) {
+            alert("مبروك! لقد حصلت على رخصة مستكشف جغرافي معتمد من الكابتن نورة.");
+        }
+    }
+</script>
 
-═══ TEACHER DASHBOARD ═══
-
-Add a hidden teacher panel (toggle via password "teacher2024") with:
-
-📊 Live Student Performance:
-- Student name | Score | Stars | Progress %
-- Auto-classification:
-  🟢 Advanced (80–100%)
-  🟡 Developing (50–79%)
-  🔴 Needs Support (below 50%)
-
-📁 Evidence Panel (for Inspector):
-- Button: "Show Evidence" → displays:
-  ✦ All student answers
-  ✦ Bloom's level covered per station
-  ✦ UDL features used
-  ✦ Direct mapping to National Curriculum learning outcomes
-  ✦ Differentiation tracking per student
-
-🎬 Presentation Mode (Inspection-Ready):
-- Button: "Presentation Mode" → activates:
-  ✦ Animated journey map
-  ✦ Captain Noura welcome messages
-  ✦ Lesson objectives displayed prominently
-  ✦ All technical elements hidden (clean display)
-
-📤 Export:
-- Download full performance report (CSV/Excel-ready format)
-- Export student evidence PDF
-
-🎯 Assessment Engine per activity:
-- Tags each answer with: Learning Objective + Bloom Level + Attempt Count + Error Type
-- Auto-generates WWW/EBI based on response content
-
-═══ REAL-TIME MONITORING ═══
-- Live progress bar per student visible during class
-- Alert if a student is stuck on same station for 3+ minutes
-
-════════════════════════════════════════════════════════════
-
-═══ FINAL OUTPUTS ═══
-
-1. Case Study Summary:
-- Visual timeline (Timeline) of key lesson events/facts
-- Concept map linking all 6 stations
-
-2. Dynamic Achievement Certificate:
-- Auto-generated upon completing all 6 stations
-- Includes: Student name | Lesson title | Date | Stations completed | Stars earned
-- Signed by "Captain Noura" (with signature graphic)
-- Downloadable as PDF
-
-3. Performance Rubric (4-level):
-| Level        | Criteria                                          |
-|-------------|---------------------------------------------------|
-| Outstanding | Completes all stations, Stretch tasks, max stars  |
-| Exceeding   | Completes all stations, mostly Core + some Stretch|
-| Meeting     | Completes all stations at Core level              |
-| Approaching | Partial completion, Scaffolded level              |
-
-4. SDG Connection:
-- At the end of the lesson, display which UN Sustainable Development Goal connects to [LESSON_TITLE]
-- Design a challenge: "Invent a solution to a real problem in your local community (Ras Al Khaimah) based on what you learned"
-
-5. Starter Activity (first screen):
-- Context: Teaching Year [GRADE_LEVEL] students in Ras Al Khaimah
-- Role: Expert in higher-order thinking skills
-- Task: 5-minute verbal discussion starter (no worksheets)
-- Constraint: Oral discussion only, thought-provoking question based on [LESSON_TITLE]
-
-═══ TECHNICAL CONSTRAINTS ═══
-- Single HTML file only (no external dependencies except CDN)
-- Fully offline-compatible after first load
-- Responsive: works on tablets and desktop
-- RTL (right-to-left) layout as default
-- All assets embedded (SVG icons, base64 images where needed)
-- CSS animations: subtle, professional (no flashy effects)
-- Browser compatibility: Chrome, Safari, Edge (latest versions)
-
-════════════════════════════════════════════════════════════
-
-═══ HOW TO USE (Instructions for Teacher) ═══
-
-STEP 1 — Upload your lesson file (PDF, Word, or image)
-STEP 2 — Paste the full prompt into Claude / ChatGPT / Gemini
-STEP 3 — Add this line at the end:
-
-"The uploaded file is the lesson content for [LESSON_TITLE] for Grade [X].
- Extract all 6 stations, learning objectives, vocabulary, and maps from this file.
- Generate the complete interactive HTML lesson now."
-
-STEP 4 — Download the generated HTML file and open in any browser
-
-DYNAMIC VARIABLES THAT AUTO-FILL FROM YOUR FILE:
-• [LESSON_TITLE]       → Extracted from file title/heading
-• [GRADE_LEVEL]        → You specify (e.g., Grade 7, Year 9)
-• [STATION_1–6]        → 6 main topics from lesson content
-• [LEARNING_OBJECTIVES] → From lesson objectives section or inferred
-• [KEY_VOCABULARY]     → All bold/underlined terms in the file
-• [MAPS_OR_IMAGES]     → Geographic/historical elements needing visuals
-
-NO MANUAL EDITING REQUIRED — the AI reads your file and fills everything automatically.
+</body>
+</html>
