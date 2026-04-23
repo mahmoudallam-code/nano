@@ -1,1 +1,762 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رحلة التعلم التفاعلية: أمريكا اللاتينية والإمارات</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        bloom: {
+                            remember: '#3b82f6', // Blue
+                            understand: '#22c55e', // Green
+                            apply: '#eab308', // Yellow
+                            analyze: '#f97316', // Orange
+                            evaluate: '#ef4444', // Red
+                            create: '#a855f7'  // Purple
+                        },
+                        warmBg: '#fdfbf7',
+                        cardBg: '#ffffff'
+                    }
+                }
+            }
+        }
+    </script>
 
+    <style>
+        body {
+            background-color: #fdfbf7;
+            color: #1e293b;
+        }
+
+        /* <!-- Chosen Palette: Warm Neutrals with Bloom's Taxonomy Accents --> */
+        
+        /* <!-- Application Structure Plan: A module-based interactive learning dashboard. The user navigates through 6 conceptual stations mapped to Bloom's Taxonomy, culminating in a gamified quiz. This structure breaks down complex geographical, economic, and geopolitical data into digestible, interactive chunks, prioritizing active engagement over passive reading. --> */
+
+        /* <!-- Visualization & Content Choices: 
+        1. Remember -> Interactive matching (Buttons/Text) -> Active recall of geography.
+        2. Understand -> Doughnut Chart (Chart.js Canvas) -> Visualizing resource proportions.
+        3. Apply -> Interactive Mapping Game (Vanilla JS) -> Connecting UAE companies to Brazilian sectors.
+        4. Analyze -> Bar Chart (Chart.js Canvas) -> Comparing trade balances (Exports/Imports).
+        5. Evaluate -> Range Slider/Opinion Selector -> Encouraging critical thinking on strategic relations.
+        6. Create -> Idea submission form -> Fostering innovation for SDG 17.
+        All visualizations use Canvas/HTML/CSS. --> */
+
+        /* <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. --> */
+
+        /* Mandatory Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            min-height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+        .nav-item.active {
+            transform: scale(1.05);
+            font-weight: 700;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .interactive-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .interactive-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .emoji-icon {
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 bg-white shadow-xl flex-shrink-0 z-10 md:min-h-screen">
+        <div class="p-6 text-center border-b border-gray-100">
+            <div class="text-4xl mb-2">🇦🇪 🤝 🇧🇷</div>
+            <h1 class="text-xl font-bold text-gray-800">أمريكا اللاتينية والإمارات</h1>
+            <p class="text-sm text-gray-500 mt-1">رحلة التعلم التفاعلية</p>
+        </div>
+        <nav class="p-4 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible">
+            <button onclick="switchView('intro')" id="nav-intro" class="nav-item active flex-shrink-0 w-full text-right px-4 py-3 rounded-lg bg-gray-100 text-gray-800 border-r-4 border-gray-400">
+                🏠 الرئيسية
+            </button>
+            <button onclick="switchView('station1')" id="nav-station1" class="nav-item flex-shrink-0 w-full text-right px-4 py-3 rounded-lg bg-blue-50 text-blue-800 border-r-4 border-bloom-remember">
+                🟦 ١. تذكر (جغرافيا)
+            </button>
+            <button onclick="switchView('station2')" id="nav-station2" class="nav-item flex-shrink-0 w-full text-right px-4 py-3 rounded-lg bg-green-50 text-green-800 border-r-4 border-bloom-understand">
+                🟩 ٢. فهم (اقتصاد)
+            </button>
+            <button onclick="switchView('station3')" id="nav-station3" class="nav-item flex-shrink-0 w-full text-right px-4 py-3 rounded-lg bg-yellow-50 text-yellow-800 border-r-4 border-bloom-apply">
+                🟨 ٣. تطبيق (استثمار)
+            </button>
+            <button onclick="switchView('station4')" id="nav-station4" class="nav-item flex-shrink-0 w-full text-right px-4 py-3 rounded-lg bg-orange-50 text-orange-800 border-r-4 border-bloom-analyze">
+                🟧 ٤. تحليل (تبادل)
+            </button>
+            <button onclick="switchView('station5')" id="nav-station5" class="nav-item flex-shrink-0 w-full text-right px-4 py-3 rounded-lg bg-red-50 text-red-800 border-r-4 border-bloom-evaluate">
+                🟥 ٥. تقويم (علاقات)
+            </button>
+            <button onclick="switchView('station6')" id="nav-station6" class="nav-item flex-shrink-0 w-full text-right px-4 py-3 rounded-lg bg-purple-50 text-purple-800 border-r-4 border-bloom-create">
+                🟪 ٦. إبداع (استدامة)
+            </button>
+            <button onclick="switchView('quiz')" id="nav-quiz" class="nav-item flex-shrink-0 w-full text-right px-4 py-3 mt-4 rounded-lg bg-gray-800 text-white border-r-4 border-yellow-400 shadow-md">
+                ⏱️ تحدي الختام
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+        <div class="max-w-5xl mx-auto">
+
+            <!-- Intro Section -->
+            <section id="intro" class="view-section active">
+                <div class="bg-white rounded-2xl shadow-sm p-8 text-center border-t-8 border-gray-800">
+                    <div class="text-6xl mb-4">🌍</div>
+                    <h2 class="text-3xl font-bold mb-4">مرحباً بك في رحلة استكشاف أمريكا اللاتينية</h2>
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        في هذه المنصة التفاعلية، لن نقرأ فقط، بل سنستكشف، نحلل، ونبني روابط بين دولة الإمارات العربية المتحدة وجمهورية البرازيل.
+                        تم تصميم هذا التطبيق ليأخذك عبر مستويات التفكير العليا وفقاً لهرم بلوم، بدءاً من الحقائق الجغرافية وصولاً إلى ابتكار حلول لاستدامة المستقبل.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <h3 class="font-bold text-gray-800 mb-2">🎯 نواتج التعلم:</h3>
+                            <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                <li>تحديد السمات الطبيعية لأمريكا اللاتينية.</li>
+                                <li>استنتاج السمات البشرية والاقتصادية.</li>
+                                <li>بيان أوجه التعاون الإماراتي البرازيلي.</li>
+                                <li>تثمين جهود الدولة في إرساء الصداقة العالمية.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <h3 class="font-bold text-gray-800 mb-2">🇦🇪 رؤية 2071 وعام الاستدامة:</h3>
+                            <p class="text-gray-600 text-sm">
+                                يهدف تعاوننا مع البرازيل في مجالات الطاقة والموانئ والأمن الغذائي إلى تحقيق اقتصاد متنوع ومستدام يضمن الريادة العالمية للإمارات في المستقبل.
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="switchView('station1')" class="mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105">
+                        ابدأ الرحلة 🚀
+                    </button>
+                </div>
+            </section>
+
+            <!-- Station 1: Remember -->
+            <section id="station1" class="view-section">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-blue-800 flex items-center gap-2"><span class="text-3xl">🟦</span> المحطة الأولى: تذكر (حقائق جغرافية)</h2>
+                    <p class="text-gray-600 mt-2">في هذا القسم، سنتعرف على أبرز المعالم الجغرافية في القارة. تفاعل مع الأزرار أدناه لربط المعلم باسمه ووصفه.</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-bloom-remember">
+                    <h3 class="font-bold mb-4 text-center text-xl">مطابقة الكنز: استكشف القارة</h3>
+                    <p class="text-center text-gray-500 mb-6">اضغط على المعلم الجغرافي لتكشف عن هويته وموقعه.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Item 1 -->
+                        <div class="interactive-card bg-blue-50 border border-blue-100 rounded-xl p-6 text-center flex flex-col items-center justify-center" onclick="revealFact('fact1', this)">
+                            <div class="emoji-icon mb-4">🌊</div>
+                            <h4 class="font-bold text-lg text-blue-900 mb-2">أكبر نظام نهري</h4>
+                            <div id="fact1" class="hidden mt-4 pt-4 border-t border-blue-200">
+                                <span class="block font-bold text-xl text-blue-700 mb-2">نهر الأمازون</span>
+                                <p class="text-sm text-gray-600">شريان الحياة في البرازيل، يضم أكبر غابة استوائية في العالم.</p>
+                            </div>
+                        </div>
+                        <!-- Item 2 -->
+                        <div class="interactive-card bg-blue-50 border border-blue-100 rounded-xl p-6 text-center flex flex-col items-center justify-center" onclick="revealFact('fact2', this)">
+                            <div class="emoji-icon mb-4">⛰️</div>
+                            <h4 class="font-bold text-lg text-blue-900 mb-2">أعلى سلسلة جبلية</h4>
+                            <div id="fact2" class="hidden mt-4 pt-4 border-t border-blue-200">
+                                <span class="block font-bold text-xl text-blue-700 mb-2">جبال الأنديز</span>
+                                <p class="text-sm text-gray-600">تمتد على طول الساحل الغربي لأمريكا الجنوبية، وهي الأطول قارياً.</p>
+                            </div>
+                        </div>
+                        <!-- Item 3 -->
+                        <div class="interactive-card bg-blue-50 border border-blue-100 rounded-xl p-6 text-center flex flex-col items-center justify-center" onclick="revealFact('fact3', this)">
+                            <div class="emoji-icon mb-4">🌄</div>
+                            <h4 class="font-bold text-lg text-blue-900 mb-2">منطقة استقرار كبرى</h4>
+                            <div id="fact3" class="hidden mt-4 pt-4 border-t border-blue-200">
+                                <span class="block font-bold text-xl text-blue-700 mb-2">هضبة البرازيل</span>
+                                <p class="text-sm text-gray-600">تغطي مساحة شاسعة من شرق وجنوب البرازيل وتتميز بتنوعها البيولوجي.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 bg-blue-100 text-blue-800 p-4 rounded-lg flex items-start gap-4">
+                        <span class="text-2xl">✈️</span>
+                        <div>
+                            <h4 class="font-bold">الربط الواقعي</h4>
+                            <p class="text-sm">الطيران الإماراتي (طيران الإمارات والاتحاد) يمتلك رحلات مباشرة تربطنا بهذه المعالم الساحرة في أمريكا اللاتينية.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Station 2: Understand -->
+            <section id="station2" class="view-section">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-green-800 flex items-center gap-2"><span class="text-3xl">🟩</span> المحطة الثانية: فهم (الاقتصاد والثقافة)</h2>
+                    <p class="text-gray-600 mt-2">لماذا سميت بأمريكا "اللاتينية"؟ وما هي الثروات التي تجعلها محط أنظار العالم؟ يعرض هذا القسم البيانات الاقتصادية الأساسية التي تمهد الطريق لفهم العلاقات الدولية.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-bloom-understand">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="font-bold text-xl mb-4 text-green-900">سر التسمية</h3>
+                            <p class="text-gray-700 mb-6 bg-green-50 p-4 rounded-lg border border-green-100">
+                                تسمى "لاتينية" بسبب اللغات السائدة فيها والتي تعود أصولها إلى اللغة اللاتينية، وأهمها <strong class="text-green-700">الإسبانية</strong> و<strong class="text-green-700">البرتغالية</strong> (وهي اللغة الرسمية في البرازيل).
+                            </p>
+                            
+                            <h3 class="font-bold text-xl mb-4 text-green-900">سلة غذاء ومعادن العالم</h3>
+                            <p class="text-gray-700 mb-4">تشتهر البرازيل وأمريكا اللاتينية بإنتاج موارد استراتيجية تعتمد عليها العديد من الدول. انظر إلى الرسم البياني التفاعلي.</p>
+                            <div class="flex gap-2">
+                                <span class="bg-gray-100 px-3 py-1 rounded-full text-sm">☕ القهوة</span>
+                                <span class="bg-gray-100 px-3 py-1 rounded-full text-sm">🥩 اللحوم</span>
+                                <span class="bg-gray-100 px-3 py-1 rounded-full text-sm">⛓️ الحديد</span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                            <!-- Chart Container -->
+                            <div class="chart-container">
+                                <canvas id="resourcesChart"></canvas>
+                            </div>
+                            <p class="text-center text-xs text-gray-500 mt-2">رسم توضيحي لنسب الصادرات الرئيسية (بيانات تقريبية للتبسيط)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Station 3: Apply -->
+            <section id="station3" class="view-section">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-yellow-800 flex items-center gap-2"><span class="text-3xl">🟨</span> المحطة الثالثة: تطبيق (محاكي الاستثمار)</h2>
+                    <p class="text-gray-600 mt-2">الإمارات لاعب رئيسي في الاقتصاد البرازيلي. في هذا النشاط، طابق الشركات الإماراتية الكبرى مع القطاع الذي تستثمر فيه داخل البرازيل.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-bloom-apply">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <!-- Companies -->
+                        <div class="w-full md:w-1/2">
+                            <h3 class="font-bold text-xl mb-4 text-yellow-900">الشركات الإماراتية</h3>
+                            <div class="space-y-3" id="companies-list">
+                                <button onclick="selectCompany('dpworld', this)" class="company-btn w-full text-right p-4 rounded-lg bg-gray-50 border border-gray-200 hover:bg-yellow-50 transition">موانئ دبي العالمية</button>
+                                <button onclick="selectCompany('etihad', this)" class="company-btn w-full text-right p-4 rounded-lg bg-gray-50 border border-gray-200 hover:bg-yellow-50 transition">طيران الاتحاد / الإمارات</button>
+                                <button onclick="selectCompany('ega', this)" class="company-btn w-full text-right p-4 rounded-lg bg-gray-50 border border-gray-200 hover:bg-yellow-50 transition">الإمارات العالمية للألمنيوم</button>
+                                <button onclick="selectCompany('mubadala', this)" class="company-btn w-full text-right p-4 rounded-lg bg-gray-50 border border-gray-200 hover:bg-yellow-50 transition">مبادلة للاستثمار</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Sectors -->
+                        <div class="w-full md:w-1/2">
+                            <h3 class="font-bold text-xl mb-4 text-yellow-900">القطاعات في البرازيل</h3>
+                            <div class="space-y-3" id="sectors-list">
+                                <button onclick="checkMatch('aviation', this)" class="w-full text-right p-4 rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 transition">✈️ النقل الجوي واللوجستيات</button>
+                                <button onclick="checkMatch('industry', this)" class="w-full text-right p-4 rounded-lg bg-gray-100 border border-gray-300 hover:bg-gray-200 transition">🏭 الصناعة والتعدين</button>
+                                <button onclick="checkMatch('ports', this)" class="w-full text-right p-4 rounded-lg bg-blue-100 border border-blue-300 hover:bg-blue-200 transition">🚢 إدارة الموانئ البحرية</button>
+                                <button onclick="checkMatch('diverse', this)" class="w-full text-right p-4 rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 transition">🌱 استثمارات متنوعة (بنية تحتية/طاقة)</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="match-feedback" class="mt-6 text-center text-lg font-bold min-h-[2rem]"></div>
+                </div>
+            </section>
+
+            <!-- Station 4: Analyze -->
+            <section id="station4" class="view-section">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-orange-800 flex items-center gap-2"><span class="text-3xl">🟧</span> المحطة الرابعة: تحليل (ميزان التبادل)</h2>
+                    <p class="text-gray-600 mt-2">التجارة هي لغة المصالح. يحلل هذا القسم طبيعة الصادرات والواردات بين الإمارات والبرازيل، لنفهم كيف يتكامل اقتصاد البلدين.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-bloom-analyze">
+                    <h3 class="font-bold text-xl mb-4 text-orange-900 text-center">التكامل الاقتصادي: السلع المتبادلة</h3>
+                    
+                    <!-- Chart Container -->
+                    <div class="chart-container mb-6">
+                        <canvas id="tradeChart"></canvas>
+                    </div>
+
+                    <div class="bg-orange-50 p-6 rounded-xl border border-orange-100">
+                        <h4 class="font-bold mb-2">🤔 سؤال تحليلي:</h4>
+                        <p class="mb-4">تصدّر البرازيل اللحوم والموارد الزراعية، بينما تصدّر الإمارات الألمنيوم ومشغولات الذهب. ماذا تستنتج من هذا الاختلاف؟</p>
+                        
+                        <button onclick="document.getElementById('analysis-answer').classList.toggle('hidden')" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded text-sm transition">عرض التحليل</button>
+                        
+                        <div id="analysis-answer" class="hidden mt-4 p-4 bg-white rounded border border-orange-200 text-gray-700">
+                            <strong>الاستنتاج:</strong> يعكس هذا "تكاملاً اقتصادياً" مثالياً. البرازيل تمتلك أراضي شاسعة ومناخاً يدعم الزراعة والثروة الحيوانية (أمن غذائي للإمارات). بالمقابل، الإمارات تمتلك بنية تحتية صناعية متطورة ورأس مال وموقعاً استراتيجياً لمعالجة وتصدير المعادن كالألمنيوم والذهب (دعم صناعي للبرازيل).
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Station 5: Evaluate -->
+            <section id="station5" class="view-section">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-red-800 flex items-center gap-2"><span class="text-3xl">🟥</span> المحطة الخامسة: تقويم (محكمة الآراء)</h2>
+                    <p class="text-gray-600 mt-2">قيم أهمية الشراكة الاستراتيجية بين البلدين. أي القطاعات ترى أنه الأهم لمستقبل دولة الإمارات؟</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-bloom-evaluate text-center">
+                    <div class="text-6xl mb-4">⚖️</div>
+                    <h3 class="font-bold text-2xl mb-2 text-red-900">مقياس الأهمية الاستراتيجية</h3>
+                    <p class="text-gray-600 mb-8">وزّع 100 نقطة على القطاعات التالية حسب أهميتها برأيك لدولة الإمارات في علاقتها مع البرازيل.</p>
+
+                    <div class="max-w-xl mx-auto space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="font-bold">🌾 الأمن الغذائي والزراعة</label>
+                                <span id="val-food" class="text-red-600 font-bold">40%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="40" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-500" oninput="updateRange('val-food', this.value)">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="font-bold">⚡ الطاقة (المتجددة والنفط)</label>
+                                <span id="val-energy" class="text-red-600 font-bold">30%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="30" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-500" oninput="updateRange('val-energy', this.value)">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="font-bold">💻 التكنولوجيا والابتكار</label>
+                                <span id="val-tech" class="text-red-600 font-bold">20%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-500" oninput="updateRange('val-tech', this.value)">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="font-bold">✈️ السياحة والثقافة</label>
+                                <span id="val-tour" class="text-red-600 font-bold">10%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-500" oninput="updateRange('val-tour', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="mt-8 p-4 bg-red-50 rounded-lg text-right">
+                        <h4 class="font-bold text-red-900 mb-2">✅ التغذية الراجعة (WWW):</h4>
+                        <p class="text-sm text-gray-700">اختلاف التقسيم يعكس تنوع المصالح. يعتبر <strong>الأمن الغذائي</strong> تاريخياً الركيزة الأساسية نظراً لواردات اللحوم والسكر الكبيرة من البرازيل، لكن مع مبادرات "عام الاستدامة"، تتجه الاستثمارات بقوة نحو <strong>الطاقة المتجددة</strong>.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Station 6: Create -->
+            <section id="station6" class="view-section">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-purple-800 flex items-center gap-2"><span class="text-3xl">🟪</span> المحطة السادسة: إبداع (نبض الاستدامة)</h2>
+                    <p class="text-gray-600 mt-2">حان دورك للابتكار. كيف يمكن للشباب في البلدين التعاون لتحقيق أهداف التنمية المستدامة (SDG 17)؟</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-bloom-create">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="text-5xl">💡</div>
+                        <div>
+                            <h3 class="font-bold text-xl text-purple-900">مبادرة جسور الاستدامة</h3>
+                            <p class="text-gray-600">اقترح حلاً إبداعياً لمشكلة "هدر الطعام المستورد من مسافات بعيدة" أو صمم فكرة لربط شباب الإمارات والبرازيل بيئياً.</p>
+                        </div>
+                    </div>
+
+                    <form onsubmit="submitIdea(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">اسم المبادرة / المشروع:</label>
+                            <input type="text" id="idea-name" required placeholder="مثال: منصة الغاف والأمازون" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">وصف موجز للحل الإبداعي:</label>
+                            <textarea id="idea-desc" required rows="4" placeholder="اكتب فكرتك هنا..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition">إرسال الفكرة للمراجعة 🚀</button>
+                    </form>
+
+                    <div id="success-message" class="hidden mt-4 p-4 bg-green-100 text-green-800 rounded-lg text-center font-bold">
+                        تم تسجيل فكرتك الإبداعية بنجاح! أنت تساهم في بناء مستقبل مستدام. 🌿
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quiz / Gamification -->
+            <section id="quiz" class="view-section">
+                <div class="mb-6 text-center">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">⏱️ سباق المعرفة</h2>
+                    <p class="text-gray-600">لديك 60 ثانية للإجابة على التحدي النهائي. هل أنت مستعد؟</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-800">
+                    
+                    <!-- Intro Screen -->
+                    <div id="quiz-intro" class="p-10 text-center">
+                        <div class="text-6xl mb-6">🏆</div>
+                        <h3 class="text-2xl font-bold mb-4">اختبر معلوماتك</h3>
+                        <p class="mb-8 text-gray-600">3 أسئلة سريعة تقيس استيعابك للمعلومات الأساسية.</p>
+                        <button onclick="startQuiz()" class="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-10 rounded-full text-lg transition">ابدأ التحدي الآن</button>
+                    </div>
+
+                    <!-- Question Screen -->
+                    <div id="quiz-active" class="hidden p-8">
+                        <div class="flex justify-between items-center mb-6 border-b pb-4">
+                            <span class="font-bold text-gray-500" id="q-counter">السؤال 1 من 3</span>
+                            <span class="font-bold text-red-600 flex items-center gap-2"><span class="text-xl">⏱️</span> <span id="timer" class="text-xl">60</span> ثانية</span>
+                        </div>
+                        
+                        <h3 id="question-text" class="text-xl font-bold mb-6 text-gray-800 leading-relaxed">السؤال هنا؟</h3>
+                        
+                        <div id="options-container" class="space-y-3">
+                            <!-- Options injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Result Screen -->
+                    <div id="quiz-result" class="hidden p-10 text-center bg-gray-50">
+                        <h3 class="text-3xl font-bold mb-2">انتهى التحدي!</h3>
+                        <div id="stars-display" class="text-5xl my-4 tracking-widest"></div>
+                        <p id="score-text" class="text-xl font-bold text-gray-700 mb-2"></p>
+                        <p id="feedback-message" class="text-gray-600 mb-8"></p>
+                        
+                        <div class="bg-white p-4 rounded border text-right mb-6 text-sm text-gray-600">
+                            <h4 class="font-bold text-gray-800 mb-2">مصفوفة التقييم (WWW & EBI):</h4>
+                            <p><strong>WWW (ما سار بشكل جيد):</strong> إكمالك للأنشطة يعكس تفاعلاً ممتازاً مع المحتوى.</p>
+                            <p class="mt-1"><strong>EBI (حتى تكون أفضل):</strong> راجع قسم "محكمة الآراء" لتعميق فهمك الاستراتيجي للعلاقات.</p>
+                        </div>
+
+                        <button onclick="switchView('intro')" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold">العودة للرئيسية</button>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // --- State Management ---
+        let currentActiveCompany = null;
+        let chartInstance1 = null;
+        let chartInstance2 = null;
+
+        // Quiz State
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 60;
+        let timerInterval;
+
+        const quizData = [
+            {
+                q: "ما هي أكبر دولة في أمريكا اللاتينية مساحة وتتحدث البرتغالية؟",
+                options: ["الأرجنتين", "كولومبيا", "البرازيل", "تشيلي"],
+                answer: 2
+            },
+            {
+                q: "أي من الشركات الإماراتية التالية تعمل في قطاع إدارة الموانئ في البرازيل؟",
+                options: ["طيران الاتحاد", "موانئ دبي العالمية", "الإمارات للألمنيوم", "مبادلة"],
+                answer: 1
+            },
+            {
+                q: "ما هو المنتج الرئيسي الذي تصدره الإمارات للبرازيل ضمن ميزان التبادل التجاري؟",
+                options: ["اللحوم والسكر", "البن والكاكاو", "الألمنيوم ومشغولات الذهب", "الخشب"],
+                answer: 2
+            }
+        ];
+
+        // --- Navigation Logic ---
+        function switchView(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Remove active state from nav
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+                el.classList.remove('font-bold');
+            });
+
+            // Show selected view
+            document.getElementById(viewId).classList.add('active');
+            
+            // Add active state to nav button (except intro might not match directly if called from content)
+            const navBtn = document.getElementById('nav-' + viewId);
+            if(navBtn) navBtn.classList.add('active', 'font-bold');
+
+            // Specific view initializations
+            if (viewId === 'station2') initResourcesChart();
+            if (viewId === 'station4') initTradeChart();
+            if (viewId === 'quiz') resetQuizUI();
+        }
+
+        // --- Station 1 Logic ---
+        function revealFact(factId, element) {
+            const fact = document.getElementById(factId);
+            if(fact.classList.contains('hidden')) {
+                fact.classList.remove('hidden');
+                element.classList.add('bg-blue-100', 'border-blue-400');
+            } else {
+                fact.classList.add('hidden');
+                element.classList.remove('bg-blue-100', 'border-blue-400');
+            }
+        }
+
+        // --- Station 2 Logic (Chart.js) ---
+        function initResourcesChart() {
+            if (chartInstance1) return; // Only init once
+            const ctx = document.getElementById('resourcesChart').getContext('2d');
+            chartInstance1 = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['اللحوم والدواجن', 'القهوة (البن)', 'الحديد وخاماته', 'أخرى (سكر، صويا)'],
+                    datasets: [{
+                        data: [35, 25, 20, 20],
+                        backgroundColor: [
+                            '#ef4444', // Red
+                            '#8b5cf6', // Purple (Coffee)
+                            '#64748b', // Slate (Iron)
+                            '#fbbf24'  // Yellow
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Tajawal' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return ' ' + context.label + ': ' + context.raw + '%'; }
+                            },
+                            titleFont: { family: 'Tajawal' },
+                            bodyFont: { family: 'Tajawal' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Station 3 Logic (Simulator) ---
+        const correctMatches = {
+            'dpworld': 'ports',
+            'etihad': 'aviation',
+            'ega': 'industry',
+            'mubadala': 'diverse'
+        };
+
+        function selectCompany(companyId, btnElement) {
+            // Reset company buttons
+            document.querySelectorAll('.company-btn').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-yellow-400', 'bg-yellow-100');
+            });
+            
+            currentActiveCompany = companyId;
+            btnElement.classList.add('ring-4', 'ring-yellow-400', 'bg-yellow-100');
+            document.getElementById('match-feedback').textContent = "الآن.. اختر القطاع المناسب لهذه الشركة في البرازيل.";
+            document.getElementById('match-feedback').className = "mt-6 text-center text-lg font-bold text-gray-600 min-h-[2rem]";
+        }
+
+        function checkMatch(sectorId, btnElement) {
+            const feedbackEl = document.getElementById('match-feedback');
+            
+            if (!currentActiveCompany) {
+                feedbackEl.textContent = "الرجاء اختيار شركة إماراتية أولاً!";
+                feedbackEl.className = "mt-6 text-center text-lg font-bold text-red-500 min-h-[2rem]";
+                return;
+            }
+
+            if (correctMatches[currentActiveCompany] === sectorId) {
+                feedbackEl.textContent = "✅ إجابة صحيحة! استثمار ناجح.";
+                feedbackEl.className = "mt-6 text-center text-lg font-bold text-green-600 min-h-[2rem]";
+                btnElement.classList.remove('bg-gray-100', 'bg-blue-50', 'bg-green-50');
+                btnElement.classList.add('bg-green-200', 'border-green-500');
+                setTimeout(() => { btnElement.classList.remove('bg-green-200', 'border-green-500'); }, 1000);
+            } else {
+                feedbackEl.textContent = "❌ قطاع غير مطابق.. حاول مرة أخرى.";
+                feedbackEl.className = "mt-6 text-center text-lg font-bold text-red-500 min-h-[2rem]";
+            }
+        }
+
+        // --- Station 4 Logic (Chart.js Bar) ---
+        function initTradeChart() {
+            if (chartInstance2) return;
+            const ctx = document.getElementById('tradeChart').getContext('2d');
+            chartInstance2 = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['الإمارات تصدر للبرازيل', 'البرازيل تصدر للإمارات'],
+                    datasets: [
+                        {
+                            label: 'المعادن (ألمنيوم/ذهب)',
+                            data: [85, 5],
+                            backgroundColor: '#f59e0b' // Yellow/Gold
+                        },
+                        {
+                            label: 'المنتجات الزراعية والحيوانية',
+                            data: [5, 90],
+                            backgroundColor: '#10b981' // Green
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { display: false },
+                            grid: { display: false }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Tajawal', size: 14 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { family: 'Tajawal' } } },
+                        tooltip: {
+                            titleFont: { family: 'Tajawal' },
+                            bodyFont: { family: 'Tajawal' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Station 5 Logic ---
+        function updateRange(id, value) {
+            document.getElementById(id).textContent = value + '%';
+        }
+
+        // --- Station 6 Logic ---
+        function submitIdea(e) {
+            e.preventDefault();
+            document.getElementById('success-message').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('success-message').classList.add('hidden');
+                e.target.reset();
+            }, 4000);
+        }
+
+        // --- Quiz Logic ---
+        function resetQuizUI() {
+            document.getElementById('quiz-intro').classList.remove('hidden');
+            document.getElementById('quiz-active').classList.add('hidden');
+            document.getElementById('quiz-result').classList.add('hidden');
+            clearInterval(timerInterval);
+        }
+
+        function startQuiz() {
+            document.getElementById('quiz-intro').classList.add('hidden');
+            document.getElementById('quiz-active').classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            timeLeft = 60;
+            document.getElementById('timer').textContent = timeLeft;
+            loadQuestion();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endQuiz();
+                }
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            const qData = quizData[currentQuestionIndex];
+            document.getElementById('q-counter').textContent = `السؤال ${currentQuestionIndex + 1} من ${quizData.length}`;
+            document.getElementById('question-text').textContent = qData.q;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-right p-4 rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition font-bold text-gray-700";
+                btn.textContent = opt;
+                btn.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (selectedIndex === quizData[currentQuestionIndex].answer) {
+                score++;
+            }
+            
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            clearInterval(timerInterval);
+            document.getElementById('quiz-active').classList.add('hidden');
+            document.getElementById('quiz-result').classList.remove('hidden');
+            
+            let stars = '';
+            let msg = '';
+            if (score === 3) {
+                stars = '⭐⭐⭐';
+                msg = 'بطل العالم! 🏆 أداء ممتاز ومعرفة دقيقة.';
+            } else if (score === 2) {
+                stars = '⭐⭐';
+                msg = 'مستكشف رائع! 🧭 لقد أديت بشكل جيد جداً.';
+            } else {
+                stars = '⭐';
+                msg = 'تابع القراءة والبحث، أنت تقترب من الإتقان! 📖';
+            }
+            
+            document.getElementById('stars-display').textContent = stars;
+            document.getElementById('score-text').textContent = `النتيجة: ${score} من 3`;
+            document.getElementById('feedback-message').textContent = msg;
+        }
+
+    </script>
+</body>
+</html>
